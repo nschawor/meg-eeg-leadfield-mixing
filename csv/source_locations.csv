@@ -1,0 +1,17 @@
+hemisphere,source_type,region,mni-x,mni-y,mni-z
+left,occipital,striate-cortex,-2,-92,-10
+left,occipital,striate-cortex,-27,-104,-5
+left,occipital,ventral,-33,-86,-7
+left,occipital,ventral,-54,-80,-5
+left,occipital,dorsal,-16,-108,9
+left,occipital,dorsal,-33,-97,20
+left,temporal,superior-temporal-sulcus-middle,-69,-16,1
+left,temporal,middle-temporal-gyrus-anterior,-68,-2,-14
+left,temporal,superior-temporal-cortex-posterior,-70,-39,12
+left,temporal,inferior-temporal-gyrus-anterior,-51,-7,-39
+left,temporal,middle-temporal-gyrus-posterior,-71,-32,-5
+left,somatosensory,postcentral-sulcus,-22,-31,78
+left,somatosensory,postcentral-sulcus,-43,-22,60
+left,somatosensory,secondary-somatosensory-cortex,-65,-9,34
+left,parietal,supramarginal-gyrus,-64,-38,39
+left,parietal,angular-gyrus,-50,-56,56
