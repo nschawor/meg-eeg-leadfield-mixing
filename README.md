@@ -4,7 +4,7 @@ This repository provides analysis code to analyze spatial mixing in electrophysi
 
 ## Reference
 
-Schaworonkow N & Nikulin VV: Is sensor space analysis good enough? Spatial patterns as a tool for assessing spatial mixing of EEG/MEG rhythms. bioRxiv (2021).
+Schaworonkow N & Nikulin VV: [Is sensor space analysis good enough? Spatial patterns as a tool for assessing spatial mixing of EEG/MEG rhythms](https://www.biorxiv.org/content/10.1101/2021.09.11.459914v1). bioRxiv (2021).
 
 ## Dataset
 
