@@ -138,3 +138,4 @@ fig.set_size_inches(8.9, 3.6)
 fig.tight_layout()
 plot_file = "../figures/fig6_mean_complexity.png"
 fig.savefig(plot_file, dpi=200)
+fig.show()

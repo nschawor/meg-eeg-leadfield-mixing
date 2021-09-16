@@ -9,6 +9,7 @@ figures_simulation:
 	python3 fig4_sim_changing_dipole_orientation.py
 
 preprocessing_data:
+    python3 proc_0_convert_data_to_mne.py
 	python3 proc_1_compute_center_frequencies.py
 	python3 proc_2_compute_ssd.py
 	python3 proc_3_compute_activation_patterns.py

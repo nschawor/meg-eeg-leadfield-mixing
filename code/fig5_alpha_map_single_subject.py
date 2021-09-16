@@ -8,6 +8,8 @@ import matplotlib.gridspec as gridspec
 import cycler
 import helper
 
+import os
+os.makedirs('../figures/', exist_ok=True)
 subjects = pd.read_csv("../csv/name_match.csv")
 df = pd.read_csv("../results/center_frequencies.csv")
 

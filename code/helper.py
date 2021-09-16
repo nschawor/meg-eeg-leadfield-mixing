@@ -122,7 +122,7 @@ def plot_patterns(patterns, raw, nr_components, colors, gs, cmap="RdBu_r"):
 
         idx1 = np.argmax(np.abs(patterns[:, i]))
         patterns[:, i] = np.sign(patterns[idx1, i]) * patterns[:, i]
-        mne.viz.plot_topomap(patterns[:, i], raw.info, axes=ax1, cmap=cmap)
+        mne.viz.plot_topomap(patterns[:, i], raw.info, axes=ax1, cmap=cmap, show=False)
         ax1.set_title("      ", backgroundcolor=colors[i], fontsize=8)
 
         cc += 1

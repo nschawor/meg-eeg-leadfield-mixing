@@ -6,6 +6,7 @@ import fooof
 import pandas as pd
 
 mne.set_log_level(verbose=False)
+os.makedirs('../results/', exist_ok=True)
 
 folder = "../working/"
 subjects = pd.read_csv("../csv/name_match.csv")
@@ -14,7 +15,8 @@ min_freq = 8
 max_freq = 13
 
 dfs = []
-for i_subj, subject in enumerate(subjects.INDI_ID):
+subjects = subjects.INDI_ID
+for i_subj, subject in enumerate(subjects):
 
     # combine eyes open and closed condition
     raws = []
@@ -39,11 +41,6 @@ for i_subj, subject in enumerate(subjects.INDI_ID):
         raws[0].drop_channels(list(missing2))
 
     raw = mne.concatenate_raws(raws)
-
-    # use only data sets for which event markers are available
-    events = mne.find_events(raw)
-    if len(events) < 3:
-        continue
 
     # discard the stim channel
     raw.pick_types(eeg=True)

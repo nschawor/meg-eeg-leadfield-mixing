@@ -22,6 +22,10 @@ for i_sub, subject in enumerate(df.index):
 
     for condition in conditions:
 
+        df_file_name = "%s/%s_%s_patterns.csv" % (results_dir, subject, condition)
+        if os.path.exists(df_file_name):
+            continue
+
         # load raw file for computing band-power
         file_name = "%s/%s_%s-raw.fif" % (folder, subject, condition)
         raw = mne.io.read_raw_fif(file_name, verbose=False)
@@ -30,9 +34,7 @@ for i_sub, subject in enumerate(df.index):
         raw.set_eeg_reference("average")
 
         # compute weighted spatial pattern cofficients
-        df_file_name = "%s/%s_%s_patterns.csv" % (results_dir, subject, condition)
-        # if os.path.exists(df_file_name):
-        #     continue
+
 
         # if there is no peak, move on
         peak = df.loc[subject]["alpha_peak"]
