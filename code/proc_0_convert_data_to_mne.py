@@ -10,7 +10,7 @@ subjects = np.sort(subjects)
 
 df = pd.read_csv('../csv/name_match.csv')
 print(len(df[df.INDI_ID.isin(subjects)])/len(df))
-df[~df.INDI_ID.isin(subjects)].INDI_ID[:50]
+df[~df.INDI_ID.isin(subjects)].INDI_ID
 
 missing = df[~df.INDI_ID.isin(subjects)].INDI_ID.to_list()
 
