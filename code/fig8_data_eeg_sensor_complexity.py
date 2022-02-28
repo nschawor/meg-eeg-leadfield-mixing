@@ -4,23 +4,25 @@ import pandas as pd
 import mne
 import numpy as np
 import matplotlib.pyplot as plt
-import helper
 import scipy.stats
 import matplotlib.gridspec as gridspec
 import seaborn as sns
 
-from matplotlib import rc
+from helper import get_electrodes
+from complexity import compute_sensor_complexity
+from params import FIG_FOLDER, RESULTS_FOLDER, SSD_NR_COMPONENTS, PATTERN_EEG_DIR
 
+from matplotlib import rc
 rc("font", **{"family": "sans-serif", "sans-serif": ["Arial"]})
 
 # load one subject for electrode locations
-raw = helper.get_electrodes()
+raw = get_electrodes()
 conditions = ["ec", "eo"]
-nr_components = 10
 
-df_subjects = pd.read_csv("../results/center_frequencies.csv")
-df_subjects = df_subjects[df_subjects.alpha_amp > 0.5]
+subjects = [s.split("_")[0] for s in os.listdir(PATTERN_EEG_DIR)]
+subjects = np.sort(np.unique(subjects))
 
+# %%
 fig = plt.figure()
 gs0 = gridspec.GridSpec(1, 2, figure=fig, top=0.85, bottom=0.25, wspace=0.35)
 gs00 = gridspec.GridSpecFromSubplotSpec(
@@ -30,24 +32,14 @@ gs00 = gridspec.GridSpecFromSubplotSpec(
 for i_cond, condition in enumerate(conditions):
 
     dfs = []
-    for i_sub, subject in enumerate(df_subjects.subject):
+    for i_sub, subject in enumerate(subjects):
 
-        df_file_name = "../results/df/%s_%s_patterns.csv" % (
-            subject,
-            condition,
-        )
+        df_file_name = f"{PATTERN_EEG_DIR}/{subject}_{condition}_patterns.csv"
 
-        if not (os.path.exists(df_file_name)):
-            # print(subject_id)
-            continue
-
+        # compute complexity
         df_patterns = pd.read_csv(df_file_name)
         weighted_patterns = df_patterns.values.T
-
-        metric = helper.compute_sensor_complexity(
-            weighted_patterns,
-            nr_components,
-        )
+        metric = compute_sensor_complexity(weighted_patterns, SSD_NR_COMPONENTS)
 
         channels = df_patterns.columns
         dff = pd.DataFrame(metric[:, np.newaxis].T, columns=channels)
@@ -57,7 +49,7 @@ for i_cond, condition in enumerate(conditions):
     print(condition, len(dfs))
     df = pd.concat(dfs, sort=False)
 
-    metric_file = "../results/metric_%s.csv" % (condition,)
+    metric_file = f"{RESULTS_FOLDER}/eeg_sensor_complexity_{condition}.csv"
     df.to_csv(metric_file, index=False)
     df = df.drop("subject", axis=1)
 
@@ -81,10 +73,10 @@ for i_cond, condition in enumerate(conditions):
 
 # %%
 
-raw = helper.get_electrodes()
+raw = get_electrodes()
 
-df_ec = pd.read_csv("../results/metric_ec.csv")
-df_eo = pd.read_csv("../results/metric_eo.csv")
+df_ec = pd.read_csv(f"{RESULTS_FOLDER}/eeg_sensor_complexity_ec.csv")
+df_eo = pd.read_csv(f"{RESULTS_FOLDER}/eeg_sensor_complexity_eo.csv")
 df_eo.drop(["subject"], axis=1, inplace=True)
 df_ec.drop(["subject"], axis=1, inplace=True)
 p = np.zeros((len(df_eo.columns),))
@@ -136,6 +128,6 @@ ax1.text((x1 + x2) * 0.5, y + h, "***", ha="center", va="bottom", color=col)
 
 fig.set_size_inches(8.9, 3.6)
 fig.tight_layout()
-plot_file = "../figures/fig6_mean_complexity.png"
+plot_file = f"{FIG_FOLDER}/fig8_mean_sensor_complexity_eeg.png"
 fig.savefig(plot_file, dpi=200)
 fig.show()

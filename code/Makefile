@@ -3,21 +3,38 @@ figures_spatial_patterns:
 	python3 fig2b_non_local_origin_alpha_mu.py
 	python3 fig2c_eye_movements_instead_of_theta.py
 	
-figures_simulation:
-	python3 fig3a_sim_plot_head_topographies.py	
-	python3 fig3b_sim_plot_alpha_map.py
+figures_simulation_eeg:
+	python3 fig3a_sim_eeg_head_topographies.py	
+	python3 fig3b_sim_eeg_alpha_map.py
 	python3 fig4_sim_changing_dipole_orientation.py
 
-preprocessing_data:
-    python3 proc_0_convert_data_to_mne.py
-	python3 proc_1_compute_center_frequencies.py
-	python3 proc_2_compute_ssd.py
-	python3 proc_3_compute_activation_patterns.py
+figures_simulation_meg:
+	python3 proc_meg_4_prepare_leadfield.py
+	python3 fig5a_sim_meg_head_topographies.py	
+	python3 fig5b_sim_meg_alpha_map.py
 
-figures_data:
-	python3 fig5_alpha_map_single_subject.py
-	python3 fig6_complexity_measure_across_participants.py
-	python3 fig7_time_resolved_rhythm_contributions.py
+preprocessing_data_eeg:
+	python3 proc_eeg_1_compute_center_frequencies.py
+	python3 proc_eeg_2_compute_ssd.py
+	python3 proc_eeg_3_compute_activation_patterns.py
 
-all:
-	figures_spatial_patterns figures_simulation preprocessing_data figures_data 
+preprocessing_data_meg:
+	python3 proc_meg_1_compute_center_frequencies.py
+	python3 proc_meg_2_compute_ssd.py
+	python3 proc_meg_3_compute_activation_patterns.py
+
+figures_data_eeg:
+	python3 fig6_data_eeg_alpha_map_single_subject.py
+	python3 fig8_data_eeg_sensor_complexity.py
+	python3 fig9_time_resolved_rhythm_contributions.py
+
+figures_data_meg:
+	python3 fig7_data_meg_alpha_map_single_subject.py
+	python3 fig8_data_meg_sensor_complexity.py
+
+eeg: figures_simulation_eeg preprocessing_data_eeg figures_data_eeg
+
+meg: figures_simulation_meg preprocessing_data_meg figures_data_meg
+
+all: figures_spatial_patterns eeg meg
+

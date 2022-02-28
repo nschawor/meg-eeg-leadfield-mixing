@@ -6,70 +6,45 @@ import os
 import helper
 import ssd
 import matplotlib.pyplot as plt
-
 from matplotlib import rc
+from helper import get_rainbow_colors, load_ssd
+from params import FIG_FOLDER, CSV_FOLDER, RESULTS_FOLDER, EEG_DATA_FOLDER, SSD_NR_COMPONENTS, \
+        SSD_BANDWIDTH
 
 rc("font", **{"family": "sans-serif", "sans-serif": ["Arial"]})
 
-df_complete = pd.read_csv("../csv/complete_datasets.csv")
-df = pd.read_csv("../results/center_frequencies.csv")
+df_complete = pd.read_csv(f"{CSV_FOLDER}/complete_datasets.csv")
+df = pd.read_csv(f"{RESULTS_FOLDER}/eeg_center_frequencies.csv")
 df = df.set_index("subject")
 
-folder = "../working/"
-results_dir = "../results/individual/"
-os.makedirs(results_dir, exist_ok=True)
 
-ssd_dir = "../results/ssd/"
-peak_cond = "alpha_peak"
-band_condition = "ipf"
-condition = "eo"
+# rainbow colors 
+colors = get_rainbow_colors()
 
-# rainbow colors + gray scales
-colors = [
-    "#482878",
-    "#3182BD",
-    "#35B779",
-    "#2E975A",
-    "#FDF224",
-    "#FDE725",
-    "#FDC325",
-    "#FD9E24",
-    "#EF7621",
-    "#EF4E20",
-]
-
-nr_components = 10
 duration = 0.5
+condition = "eo"
 subjects = ["sub-032370"]
-
+# %% make a plot for all selected participants
 for i_sub, subject in enumerate(subjects):
 
-    plt.close("all")
     print(subject)
-    test = df_complete[df_complete.INDI_ID == subject][condition]
-    print(test)
-    if ~np.all(test.values):
+    complete = df_complete[df_complete.INDI_ID == subject][condition]
+    if ~np.all(complete.values):
         continue
 
-    file_name = "%s/%s_%s-raw.fif" % (folder, subject, condition)
+    file_name = f"{EEG_DATA_FOLDER}/{subject}_{condition}-raw.fif"
     raw = mne.io.read_raw_fif(file_name, verbose=False)
     raw.load_data()
-
     events = mne.find_events(raw)
     raw.pick_types(eeg=True)
 
-    df_file_name = "../results/df/%s_%s_patterns.csv" % (subject, condition)
-
     # compute SSD in narrow band
-    peak = df.iloc[i_sub]["alpha_peak"]
-    if np.isnan(peak):
-        continue
-
-    filters, patterns = helper.load_ssd(subject, condition)
+    peak = df.iloc[i_sub]["peak_frequency"]
+    filters, patterns = load_ssd(subject, "eeg", condition)
     raw_ssd = ssd.apply_filters(raw, filters)
 
     # compute band power in narrow band around peak or fixed
-    raw_ssd.filter(peak - 2, peak + 2, verbose=False)
+    raw_ssd.filter(peak - SSD_BANDWIDTH, peak + SSD_BANDWIDTH, verbose=False)
     raw_ssd.apply_hilbert(envelope=True)
 
     # cut into segments of 10s and average
@@ -86,14 +61,14 @@ for i_sub, subject in enumerate(subjects):
     fig, ax = plt.subplots(2, 1)
     for i in range(2):
         idx = picks[i]
-        w = (std_time * np.abs(patterns[idx, :]))[:, :nr_components]
+        w = (std_time * np.abs(patterns[idx, :]))[:, :SSD_NR_COMPONENTS]
         w = w / np.sum(w, axis=1).max()  # w.max()#(axis=1, keepdims=True)
         ax[i].stackplot(time, 100 * w.T, colors=colors)
         ax[i].set(
             xlabel="time [min]",
             xlim=(0, time[-1]),
             ylabel="power in the alpha-band\n[% maximum]",
-            title="electrode %s" % raw.ch_names[idx],
+            title=f"electrode {raw.ch_names[idx]}",
             ylim=(0, 60),
         )
 
@@ -103,7 +78,7 @@ for i_sub, subject in enumerate(subjects):
 
     fig.set_size_inches(5, 5)
     fig.tight_layout()
-    fig.savefig("../figures/fig7_over_time_time_course.png", dpi=200)
+    fig.savefig(f"{FIG_FOLDER}/fig9_over_time_time_course.png", dpi=200)
     fig.show()
 
     fig, ax = plt.subplots(1, 2)
@@ -126,7 +101,7 @@ for i_sub, subject in enumerate(subjects):
 
     fig.set_size_inches(6, 3)
     fig.tight_layout()
-    fig.savefig("../figures/fig7_over_time_ratio.png", dpi=200)
+    fig.savefig(f"{FIG_FOLDER}/fig9_over_time_ratio.png", dpi=200)
     fig.show()
 
     nr_patterns = 5
@@ -150,5 +125,5 @@ for i_sub, subject in enumerate(subjects):
         )
     fig.set_size_inches(2, 8)
     fig.tight_layout()
-    fig.savefig("../figures/fig7_over_time_patterns.png", dpi=200)
+    fig.savefig(f"{FIG_FOLDER}/fig9_over_time_patterns.png", dpi=200)
     fig.show()

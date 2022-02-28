@@ -1,18 +1,31 @@
 """Spatial pattern demo #3: Not sufficient data cleaning."""
+import os
 import mne
 import numpy as np
-import helper
 import matplotlib.pyplot as plt
+
 import ssd
+from helper import get_electrodes
+from params import FIG_FOLDER
 
-plt.close("all")
-folder = "../data/raw/"
+# download sub-32305 Raw Data from here:
+# http://fcon_1000.projects.nitrc.org/indi/retro/MPI_LEMON/downloads/download_EEG.html
+# and put it in the specified data folder
+data_folder = "../data/"
 
-# subject ="sub-032305"
+# this renaming has to take place because otherwise there is a mismatch 
+# between subject identifiers in the header files
+old_sub_name = "sub-032305"
 subject = "sub-010006"
-condition = "ec"
+os.makedirs(f"{data_folder}/{subject}/RSEEG", exist_ok=True)
+for file_type in ["eeg", "vhdr", "vmrk"]:
+    old_file = f"{data_folder}/{old_sub_name}/RSEEG/{old_sub_name}.{file_type}"
+    new_file = old_file.replace(old_sub_name, subject)
+    if not(os.path.exists(new_file)):
+        os.rename(old_file, new_file)
 
-file_name = "%s/%s/RSEEG/%s.vhdr" % (folder, subject, subject)
+# load data and filter in theta range
+file_name = f"{data_folder}/{subject}/RSEEG/{subject}.vhdr"
 raw = mne.io.read_raw_brainvision(file_name, preload=True)
 raw.drop_channels(["VEOG"])
 
@@ -30,13 +43,13 @@ W = W[:, np.newaxis]
 cov_signal = np.cov(raw._data)
 patterns = ssd.compute_patterns(cov_signal, W)
 
-# better electrode positions
-raw2 = helper.get_electrodes()
+# load electrode positions
+raw2 = get_electrodes()
 remove = set(raw2.ch_names).difference(raw.ch_names)
 raw2.drop_channels(list(remove))
 raw2.reorder_channels(raw.ch_names)
 
-# create plot
+# plot spatial patterns
 fig, ax = plt.subplots(1, 1)
 
 mask = np.zeros((len(raw.ch_names),), dtype="bool")
@@ -62,5 +75,5 @@ im = mne.viz.plot_topomap(
 
 fig.set_size_inches(3, 3)
 fig.tight_layout()
-fig.savefig("../figures/fig2_theta_eye_movements.png", dpi=200)
+fig.savefig(f"{FIG_FOLDER}/fig2_theta_eye_movements.png", dpi=200)
 fig.show()

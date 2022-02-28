@@ -12,6 +12,7 @@ doi: 10.1016/j.neuroimage.2011.01.057. Epub 2011 Jan 27. PMID: 21276858.
 import numpy as np
 from scipy.linalg import eig
 import mne
+import matplotlib.pyplot as plt
 
 
 def compute_ged(cov_signal, cov_noise):
@@ -55,7 +56,6 @@ def compute_ged(cov_signal, cov_noise):
 
     [lambda_val, filters] = eig(cov_signal_ex, cov_signal_ex + cov_noise_ex)
 
-    # eigenvalues should be sorted by size already, but double checking
     idx = np.argsort(lambda_val)[::-1]
     filters = filters[:, idx]
     filters = np.matmul(M, filters)
@@ -87,7 +87,7 @@ def apply_filters(raw, filters, prefix="ssd"):
     nr_components = filters.shape[1]
     raw_projected._data = components
 
-    ssd_channels = ["%s%i" % (prefix, i + 1) for i in range(nr_components)]
+    ssd_channels = [f"{prefix}{i+1}" for i in range(nr_components)]
     mapping = dict(zip(raw.info["ch_names"], ssd_channels))
     mne.channels.rename_channels(raw_projected.info, mapping)
     raw_projected.drop_channels(raw_projected.info["ch_names"][nr_components:])
@@ -214,3 +214,27 @@ def compute_ssd(raw, signal_bp, noise_bp, noise_bs):
     patterns = compute_patterns(cov_signal, filters)
 
     return filters, patterns
+
+
+def plot_patterns(patterns, raw, nr_patterns=10):
+    """Convenience plotting function for checking spatial patterns.
+
+    Args:
+        patterns : array, 2-D
+            Spatial patterns.
+        raw : instance of Raw
+            Raw instance containing electrode positions.
+        nr_patterns :  int (optional)
+            Number of patterns to be plotted. Defaults to 10.
+    """
+
+    nr_cols = 4
+    nr_rows = int(np.ceil(nr_patterns/4))
+
+    fig, ax = plt.subplots(nr_rows, nr_cols)
+
+    for i in range(nr_patterns):
+        ax1 = ax.flatten()[i]
+        mne.viz.plot_topomap(patterns[:, i], raw.info, axes=ax1)
+
+    fig.show()
